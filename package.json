@@ -1,0 +1,54 @@
+{
+  "name": "meeting-transcriber-mcp",
+  "version": "0.1.0",
+  "description": "stdio MCP server for the Meeting Transcriber macOS app: submit audio, read diarized transcripts, and control meeting watching over its localhost automation API.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "transcription",
+    "diarization",
+    "meeting-notes",
+    "macos",
+    "local-first",
+    "whisper"
+  ],
+  "homepage": "https://github.com/msvargas/meeting-transcriber-mcp#readme",
+  "bugs": "https://github.com/msvargas/meeting-transcriber-mcp/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/msvargas/meeting-transcriber-mcp.git"
+  },
+  "license": "MIT",
+  "author": "msvargas",
+  "type": "module",
+  "main": "./dist/index.js",
+  "bin": {
+    "meeting-transcriber-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "check:refs": "bash scripts/check-no-internal-refs.sh",
+    "check": "npm run typecheck && npm run test && npm run check:refs",
+    "prepublishOnly": "npm run check && npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.2.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.2.0",
+    "@types/node": "^22.20.4",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

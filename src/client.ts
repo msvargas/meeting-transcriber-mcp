@@ -19,6 +19,8 @@ const MAX_BODY_BYTES = 32 * 1024;
 
 export interface RequestOptions {
   body?: unknown;
+  /** The naming endpoints answer 200 with a plain "ok" rather than a DTO. */
+  expectJson?: boolean;
   idempotencyKey?: string;
   method: "GET" | "POST";
   path: string;
@@ -62,7 +64,9 @@ export class AutomationApiClient {
     if (response.status >= 400) {
       throw httpError(response.status, this.config.tokenPath, body);
     }
-    return { data: parseJson<T>(body), status: response.status };
+    const data =
+      options.expectJson === false ? (undefined as T) : parseJson<T>(body);
+    return { data, status: response.status };
   }
 
   /** Only ever called with a path the app itself reported, so no tool reads arbitrary files. */

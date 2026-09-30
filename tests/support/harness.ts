@@ -53,6 +53,14 @@ export function jsonResponse(status: number, body?: unknown): Response {
   });
 }
 
+/** What the naming endpoints really answer: a bare "ok", not a DTO. */
+export function textResponse(status: number, body: string): Response {
+  return new Response(body, {
+    headers: { "content-type": "text/plain" },
+    status,
+  });
+}
+
 export interface Harness {
   client: Client;
   close: () => Promise<void>;

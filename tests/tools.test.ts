@@ -6,6 +6,7 @@ import {
   jsonResponse,
   recordingFetch,
   textOf,
+  textResponse,
 } from "./support/harness.js";
 
 const DONE_JOB = {
@@ -177,7 +178,7 @@ test("naming can be read, confirmed and skipped", async () => {
         ],
       });
     }
-    return jsonResponse(200);
+    return textResponse(200, "ok");
   });
   const harness = await connectHarness({ fetchImpl });
   try {
@@ -188,10 +189,11 @@ test("naming can be read, confirmed and skipped", async () => {
     assert.match(textOf(read), /Speaker 1 -> suggested "Alice" \(412\.5s speaking\)/);
     assert.match(textOf(read), /no known voice matched/);
 
-    await harness.client.callTool({
+    const confirmed = await harness.client.callTool({
       arguments: { jobID: "job-1", mapping: { "Speaker 2": "Bob" } },
       name: "confirm_naming",
     });
+    assert.equal(isError(confirmed), false);
     assert.equal(calls[1]?.url, "http://127.0.0.1:9876/v1/jobs/job-1/naming");
     assert.deepEqual(calls[1]?.body, { mapping: { "Speaker 2": "Bob" } });
 
@@ -199,6 +201,7 @@ test("naming can be read, confirmed and skipped", async () => {
       arguments: { jobID: "job-1" },
       name: "skip_naming",
     });
+    assert.equal(isError(skipped), false);
     assert.equal(
       calls[2]?.url,
       "http://127.0.0.1:9876/v1/jobs/job-1/naming/skip"

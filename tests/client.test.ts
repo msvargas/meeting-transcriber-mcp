@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { AutomationApiClient } from "../src/client.js";
 import { AutomationApiError } from "../src/errors.js";
-import { jsonResponse, recordingFetch, testConfig } from "./support/harness.js";
+import {
+  jsonResponse,
+  recordingFetch,
+  testConfig,
+  textResponse,
+} from "./support/harness.js";
 
 test("rereads the token and retries once after a 401, because the app rotates it", async () => {
   const tokens = ["stale-token", "fresh-token"];
@@ -101,7 +106,7 @@ test("refuses an oversized body instead of letting the app drop the connection",
   assert.equal(calls.length, 0);
 });
 
-test("accepts an empty 200 body, which the naming endpoints return", async () => {
+test("accepts an empty 200 body", async () => {
   const { fetchImpl } = recordingFetch(() => jsonResponse(200));
   const client = new AutomationApiClient({ config: testConfig(), fetchImpl });
 
@@ -111,6 +116,33 @@ test("accepts an empty 200 body, which the naming endpoints return", async () =>
   });
 
   assert.equal(status, 200);
+});
+
+test('accepts the bare "ok" the naming endpoints answer with', async () => {
+  const { fetchImpl } = recordingFetch(() => textResponse(200, "ok"));
+  const client = new AutomationApiClient({ config: testConfig(), fetchImpl });
+
+  const { status } = await client.request({
+    expectJson: false,
+    method: "POST",
+    path: "/v1/jobs/job-1/naming/skip",
+  });
+
+  assert.equal(status, 200);
+});
+
+test("still flags a non-JSON body where a DTO was expected", async () => {
+  const { fetchImpl } = recordingFetch(() => textResponse(200, "ok"));
+  const client = new AutomationApiClient({ config: testConfig(), fetchImpl });
+
+  await assert.rejects(
+    client.request({ method: "GET", path: "/v1/watch" }),
+    (error: unknown) => {
+      assert.ok(error instanceof AutomationApiError);
+      assert.equal(error.code, "UNEXPECTED_RESPONSE");
+      return true;
+    }
+  );
 });
 
 test("turns a refused connection into the instructions for enabling the API", async () => {

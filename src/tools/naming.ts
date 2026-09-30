@@ -61,6 +61,7 @@ export function registerNamingTools(
       await withApiErrors(async () => {
         await client.request<unknown>({
           body: { mapping: args.mapping },
+          expectJson: false,
           method: "POST",
           path: `/v1/jobs/${encodeURIComponent(args.jobID)}/naming`,
         });
@@ -89,6 +90,7 @@ export function registerNamingTools(
     async (args) =>
       await withApiErrors(async () => {
         await client.request<unknown>({
+          expectJson: false,
           method: "POST",
           path: `/v1/jobs/${encodeURIComponent(args.jobID)}/naming/skip`,
         });
